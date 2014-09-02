@@ -12,7 +12,7 @@ String descr="Command/response test program v0.1";
 String id="a1";
 String gid="a";
 int    del=0; //delayed response
-byte   echo=1; // command back to host
+byte   echo=0; // command back to host
 
 // List of commands defined by keyword, funtion pointer, number of arguments 
 // and description used in "help" command.
@@ -44,7 +44,7 @@ void setup() {
   stepper.setAcceleration(3000);
   //stepper.setSpeed(2000);
   
-  Serial.begin(9600);
+  Serial.begin(115200);
   cmd.ok(); // say hello
 }
 
