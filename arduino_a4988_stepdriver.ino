@@ -49,9 +49,9 @@ void setup() {
 }
 
 void loop() {  
+/*
   //stepper.runSpeed();
-  int destpos = 50000;
-/*   
+  int destpos = 50000;   
   stepper.moveTo(destpos);
   while (stepper.currentPosition() != destpos) // Full speed up to 1200
     stepper.run();
