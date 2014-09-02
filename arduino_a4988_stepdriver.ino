@@ -4,6 +4,7 @@
 #include <AccelStepper.h>
 
 AccelStepper stepper(1, 3, 6); // pin 3 = step, pin 6 = direction
+int direction = 1; // 1 for ClockWise, -1 for CounterClockWise
 
 // Compile and upload to arduino. Run the serial monitor and type command
 // :help;
@@ -19,8 +20,10 @@ byte   echo=0; // command back to host
 // List of commands defined by keyword, funtion pointer, number of arguments 
 // and description used in "help" command.
 CallBackDef f[] = {
-  {(String)"add", (FunctionPointer)&add,  (int)2, (String)":num1:num2"},
-  {(String)"stepmoveto", (FunctionPointer)&stepmoveto,  (float)1, (String)":position"}
+  {(String)"add", (FunctionPointer)&add, (int)2, (String)":<num1>:<num2>"},
+  {(String)"setdir", (FunctionPointer)&setdir, (int)1, (String)":<1|-1>"},
+  {(String)"setspeedacl", (FunctionPointer)&setspeedacl, (int)2, (String)":<speed>:<acceleration>"},
+  {(String)"moveto", (FunctionPointer)&moveto, (float)1, (String)":<position>"}
 };
 
 // initiate command handler: function array, number of functions and intial values
@@ -39,12 +42,40 @@ void add(String argv[]) {
   cmd.respond(String(a + b));
 }
 
-// samplecmd
-// id=a1:stepmoveto:15000;
-// id=a1:stepmoveto:500000;
-void stepmoveto(String argv[]) {
+// id=a1:setdir:1;
+// id=a1:setdir:-1;
+void setdir(String argv[]) {
+
+  int idir = cmd.stoi(argv[0]); // 1 for ClockWise, -1 for CounterClockWise
+  if(idir == 1 || idir == -1)
+  {
+    direction = idir;
+    cmd.respond("direction="+String(idir));
+  }
+  else
+  {
+    cmd.respond("direction=NAN");
+  }
+}
+
+// id=a1:setspeedacl:6000:3000;
+void setspeedacl(String argv[]) {
+
+  int spd = cmd.stoi(argv[0]);
+  int accl = cmd.stoi(argv[1]);
+  
+  stepper.setMaxSpeed(spd);
+  stepper.setAcceleration(accl);
+  
+  cmd.respond("speed="+String(spd)+":acceleration="+String(accl));
+}
+
+// id=a1:moveto:15000;
+// id=a1:moveto:500000;
+void moveto(String argv[]) {
 
   long int destpos = (long int)cmd.stof(argv[0]);  // use float for higher number
+  destpos = direction * destpos; // set direction
   stepper.moveTo(destpos);
   while (stepper.currentPosition() != destpos)
     stepper.run();
@@ -66,23 +97,5 @@ void setup() {
 }
 
 void loop() {  
-/*
-  //stepper.runSpeed();
-  int destpos = 50000;   
-  stepper.moveTo(destpos);
-  while (stepper.currentPosition() != destpos) // Full speed up to 1200
-    stepper.run();
-  stepper.stop(); // Stop as fast as possible: sets new target
-  stepper.runToPosition(); 
-  // Now stopped after quickstop
-  // Now go backwards
-  stepper.moveTo(-destpos);
-  while (stepper.currentPosition() != 0) // Full speed basck to 0
-    stepper.run();
-  stepper.stop(); // Stop as fast as possible: sets new target
-  stepper.runToPosition(); 
-  // Now stopped after quickstop   
-*/
-
   cmd.cmdCheck();
 }
