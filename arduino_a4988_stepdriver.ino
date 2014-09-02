@@ -3,6 +3,8 @@
 // https://www.pjrc.com/teensy/td_libs_AccelStepper.html
 #include <AccelStepper.h>
 
+AccelStepper stepper(1, 3, 6); // pin 3 = step, pin 6 = direction
+
 // Compile and upload to arduino. Run the serial monitor and type command
 // :help;
 // Values for initiation of cmd/response interface. 
@@ -17,7 +19,8 @@ byte   echo=0; // command back to host
 // List of commands defined by keyword, funtion pointer, number of arguments 
 // and description used in "help" command.
 CallBackDef f[] = {
-  {(String)"add",   (FunctionPointer)&add,  (int)2, (String)":num1:num2"}
+  {(String)"add", (FunctionPointer)&add,  (int)2, (String)":num1:num2"},
+  {(String)"stepmoveto", (FunctionPointer)&stepmoveto,  (float)1, (String)":position"}
 };
 
 // initiate command handler: function array, number of functions and intial values
@@ -36,8 +39,22 @@ void add(String argv[]) {
   cmd.respond(String(a + b));
 }
 
+// samplecmd
+// id=a1:stepmoveto:15000;
+// id=a1:stepmoveto:500000;
+void stepmoveto(String argv[]) {
 
-AccelStepper stepper(1, 3, 6); // pin 3 = step, pin 6 = direction
+  long int destpos = (long int)cmd.stof(argv[0]);  // use float for higher number
+  stepper.moveTo(destpos);
+  while (stepper.currentPosition() != destpos)
+    stepper.run();
+  stepper.stop(); // Stop as fast as possible: sets new target
+  stepper.runToPosition(); 
+  // Now stopped after quickstop
+  
+  //cmd.respond(String("position="+destpos));
+  cmd.respond("position="+String(destpos));
+}
 
 void setup() {
   stepper.setMaxSpeed(6000);
