@@ -50,7 +50,7 @@ void setdir(String argv[]) {
   if(idir == 1 || idir == -1)
   {
     direction = idir;
-    cmd.respond("direction="+String(idir));
+    cmd.respond("direction="+String(idir)+":ok");
   }
   else
   {
@@ -67,7 +67,7 @@ void setspeedacl(String argv[]) {
   stepper.setMaxSpeed(spd);
   stepper.setAcceleration(accl);
   
-  cmd.respond("speed="+String(spd)+":acceleration="+String(accl));
+  cmd.respond("speed="+String(spd)+":acceleration="+String(accl)+":ok");
 }
 
 // id=a1:moveto:15000;
@@ -84,7 +84,7 @@ void moveto(String argv[]) {
   // Now stopped after quickstop
   
   //cmd.respond(String("position="+destpos));
-  cmd.respond("position="+String(destpos));
+  cmd.respond("position="+String(destpos)+":ok");
 }
 
 void setup() {
