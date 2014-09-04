@@ -20,10 +20,10 @@ byte   echo=0; // command back to host
 // List of commands defined by keyword, funtion pointer, number of arguments 
 // and description used in "help" command.
 CallBackDef f[] = {
-  {(String)"add", (FunctionPointer)&add, (int)2, (String)":<num1>:<num2>"},
   {(String)"setdir", (FunctionPointer)&setdir, (int)1, (String)":<1|-1>"},
   {(String)"setspeedacl", (FunctionPointer)&setspeedacl, (int)2, (String)":<speed>:<acceleration>"},
-  {(String)"moveto", (FunctionPointer)&moveto, (float)1, (String)":<position>"}
+  {(String)"moveto", (FunctionPointer)&moveto, (float)1, (String)":<position>"},
+  {(String)"movetofeedback", (FunctionPointer)&movetofeedback, (float)2, (String)":<position>:<feedback>"}
 };
 
 // initiate command handler: function array, number of functions and intial values
@@ -35,12 +35,6 @@ CallBack cmd(f, sizeof(f) / sizeof(*f), id, gid, descr, del, echo);
 // parameters but any additional validation has to be perfomed by each
 // callback function. As the argument list is passed as strings, type
 // casting to other types is the responsibility of the function.
-
-void add(String argv[]) {
-  int a = cmd.stoi(argv[0]);
-  int b = cmd.stoi(argv[1]);
-  cmd.respond(String(a + b));
-}
 
 // id=a1:setdir:1;
 // id=a1:setdir:-1;
@@ -79,6 +73,31 @@ void moveto(String argv[]) {
   stepper.moveTo(destpos);
   while (stepper.currentPosition() != destpos)
     stepper.run();
+  stepper.stop(); // Stop as fast as possible: sets new target
+  stepper.runToPosition(); 
+  // Now stopped after quickstop
+  
+  //cmd.respond(String("position="+destpos));
+  cmd.respond("position="+String(destpos)+":ok");
+}
+
+// id=a1:movetofeedback:15000:1000;
+// id=a1:movetofeedback:500000:1000;
+void movetofeedback(String argv[]) {
+
+  long int destpos = (long int)cmd.stof(argv[0]);  // use float for higher number
+  long int feedback = (long int)cmd.stof(argv[1]);  // use float for higher number
+  
+  destpos = direction * destpos; // set direction
+  stepper.moveTo(destpos);
+  long int curpos = 0;
+  while ((curpos = stepper.currentPosition()) != destpos)
+  {
+    if((curpos % feedback) == 0)
+      cmd.respond("curpos="+String(curpos)+":beacon");
+    stepper.run();
+  }
+  cmd.respond("curpos="+String(curpos)+":beacon");
   stepper.stop(); // Stop as fast as possible: sets new target
   stepper.runToPosition(); 
   // Now stopped after quickstop
