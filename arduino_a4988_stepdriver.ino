@@ -28,7 +28,8 @@ CallBackDef f[] = {
   {(String)"setdir", (FunctionPointer)&setdir, (int)1, (String)":<1|-1>"},
   {(String)"setspeedacl", (FunctionPointer)&setspeedacl, (int)2, (String)":<speed>:<acceleration>"},
   {(String)"moveto", (FunctionPointer)&moveto, (float)1, (String)":<position>"},
-  {(String)"movetofeedback", (FunctionPointer)&movetofeedback, (float)2, (String)":<position>:<feedback>"}
+  {(String)"movetofeedback", (FunctionPointer)&movetofeedback, (float)2, (String)":<position>:<feedback>"},
+  {(String)"getcurrpos", (FunctionPointer)&getcurrpos, (int)1, (String)"0"}
 };
 
 // initiate command handler: function array, number of functions and intial values
@@ -125,6 +126,13 @@ void movetofeedback(String argv[]) {
   
   //cmd.respond(String("position="+destpos));
   cmd.respond("position="+String(destpos)+":ok");
+}
+
+// id=a1:getcurrpos;
+void getcurrpos(String argv[]) {
+
+  long int curpos = stepper.currentPosition();
+  cmd.respond("position="+String(curpos)+":ok");
 }
 
 void setup() {
