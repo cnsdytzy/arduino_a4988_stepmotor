@@ -6,6 +6,11 @@
 AccelStepper stepper(1, 3, 6); // pin 3 = step, pin 6 = direction
 int direction = 1; // 1 for ClockWise, -1 for CounterClockWise
 
+// auxiliar gpio
+int nsleep = 4;
+
+// NOTE: /RESET and /ENABLE connects directly to VCC in PCB
+
 // Compile and upload to arduino. Run the serial monitor and type command
 // :help;
 // Values for initiation of cmd/response interface. 
@@ -68,6 +73,10 @@ void setspeedacl(String argv[]) {
 // id=a1:moveto:500000;
 void moveto(String argv[]) {
 
+  // A4988 wakes up
+  digitalWrite(nsleep, HIGH);
+  delay(10); // 10 ms
+  
   long int destpos = (long int)cmd.stof(argv[0]);  // use float for higher number
   destpos = direction * destpos; // set direction
   stepper.moveTo(destpos);
@@ -76,6 +85,10 @@ void moveto(String argv[]) {
   stepper.stop(); // Stop as fast as possible: sets new target
   stepper.runToPosition(); 
   // Now stopped after quickstop
+  
+  // A4988 goes to sleep
+  digitalWrite(nsleep, LOW);
+  delay(10); // 10 ms
   
   //cmd.respond(String("position="+destpos));
   cmd.respond("position="+String(destpos)+":ok");
@@ -87,6 +100,10 @@ void movetofeedback(String argv[]) {
 
   long int destpos = (long int)cmd.stof(argv[0]);  // use float for higher number
   long int feedback = (long int)cmd.stof(argv[1]);  // use float for higher number
+  
+  // A4988 wakes up
+  digitalWrite(nsleep, HIGH);
+  delay(10); // 10 ms
   
   destpos = direction * destpos; // set direction
   stepper.moveTo(destpos);
@@ -102,11 +119,19 @@ void movetofeedback(String argv[]) {
   stepper.runToPosition(); 
   // Now stopped after quickstop
   
+  // A4988 goes to sleep
+  digitalWrite(nsleep, LOW);
+  delay(10); // 10 ms  
+  
   //cmd.respond(String("position="+destpos));
   cmd.respond("position="+String(destpos)+":ok");
 }
 
 void setup() {
+  pinMode(nsleep, OUTPUT);
+  digitalWrite(nsleep, LOW);
+  //digitalWrite(nsleep, HIGH);
+  
   stepper.setMaxSpeed(6000);
   stepper.setAcceleration(3000);
   //stepper.setSpeed(2000);
