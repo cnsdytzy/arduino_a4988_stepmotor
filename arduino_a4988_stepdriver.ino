@@ -129,10 +129,10 @@ void movetofeedback(String argv[]) {
 }
 
 // id=a1:getcurrpos;
-void getcurrpos(String argv[]) {
+void getcurrpos(String argv[]) {  
 
   long int curpos = stepper.currentPosition();
-  cmd.respond("position="+String(curpos)+":ok");
+  cmd.respond("reqpos="+String(curpos)+":ok");
 }
 
 void setup() {
