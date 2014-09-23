@@ -3,11 +3,11 @@
 // https://www.pjrc.com/teensy/td_libs_AccelStepper.html
 #include <AccelStepper.h>
 
-AccelStepper stepper(1, 3, 6); // pin 3 = step, pin 6 = direction
+AccelStepper stepper(1, 8, 9); // pin 8 = step, pin 9 = direction
 int direction = 1; // 1 for ClockWise, -1 for CounterClockWise
 
 // auxiliar gpio
-int nsleep = 4;
+int nsleep = 7;
 
 // NOTE: /RESET and /ENABLE connects directly to VCC in PCB
 
@@ -144,7 +144,8 @@ void setup() {
   stepper.setAcceleration(3000);
   //stepper.setSpeed(2000);
   
-  Serial.begin(115200);
+  //Serial.begin(115200);
+  Serial.begin(57600);
   cmd.ok(); // say hello
 }
 
